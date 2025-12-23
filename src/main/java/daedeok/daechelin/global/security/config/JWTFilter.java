@@ -45,6 +45,13 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
+        String category = jwtUtil.getCategory(token);
+        if (!category.equals("access")) {
+            // response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 응답 코드 설정
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // 4. 토큰에서 아이디와 권한 획득
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);

@@ -46,6 +46,8 @@ public class SecurityConfig {
         // HTTP Basic 인증 disable
         http.httpBasic((auth) -> auth.disable());
 
+        http.logout((auth) -> auth.disable());
+
         // 세션 설정 -> STATELESS (서버에 세션 저장 안함)
         http.sessionManagement((session) -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -59,7 +61,7 @@ public class SecurityConfig {
         // JWTFilter는 Access Token 검증만 하므로 그대로 두거나, category 확인 로직 추가 가능
         http.addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
 
-        // (수정) LoginFilter에 refreshTokenRepository도 같이 넘겨줌
+        //LoginFilter에 refreshTokenRepository도 같이 넘겨줌
         http.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshTokenRepository), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
