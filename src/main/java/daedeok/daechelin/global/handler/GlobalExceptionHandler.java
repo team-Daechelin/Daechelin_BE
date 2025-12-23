@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice // 모든 컨트롤러의 예외를 감지함
 public class GlobalExceptionHandler {
 
-    // 1. 서비스 로직에서 발생하는 에러 처리 (예: 중복 가입 시도)
+    // 1. 서비스 로직에서 발생하는 에러 처리
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException e) {
-        // SignUpService에서 던진 "이미 존재하는..." 메시지를 그대로 가져옵니다.
+        // SignUpService에서 던진 메시지를 그대로 가져옵니다.
         ErrorResponse response = new ErrorResponse(400, e.getMessage());
         return ResponseEntity.status(400).body(response);
     }

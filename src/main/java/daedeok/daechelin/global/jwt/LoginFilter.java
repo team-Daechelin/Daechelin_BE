@@ -24,7 +24,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
 
-    // 1. /login 요청이 오면 실행되는 메소드 (인증 시도)
+    // /login 요청이 오면 실행되는 메소드 (
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
@@ -46,7 +46,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         }
     }
 
-    // 2. 인증 성공 시 실행 (JWT 발급)
+    // 인증 성공 시 실행 ]
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
 
