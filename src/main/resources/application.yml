@@ -4,13 +4,16 @@ spring:
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
-
+  data:
+    redis:
+      host: localhost
+      port: 6379
   jpa:
     hibernate:
-      ddl-auto: update # 처음 실행하면 테이블을 자동 생성 (운영 시엔 validate/none 권장)
+      ddl-auto: update
     properties:
       hibernate:
-        format_sql: true # 실행되는 SQL을 보기 좋게 출력
+        format_sql: true\
 
 jwt:
   secret: bW9yZGF0aGVfMzJfYnl0ZXNfbG9uZ19zZWNyZXRfa2V5
