@@ -37,13 +37,17 @@ public class JWTUtil {
     }
 
     // 토큰 생성 (로그인 성공 시 호출됨)
-    public String createJwt(String username, String role, Long expiredMs) {
+    public String createJwt(String category, String username, String role, Long expiredMs) {
         return Jwts.builder()
+                .claim("category", category) // "access" or "refresh"
                 .claim("username", username)
                 .claim("role", role)
-                .issuedAt(new Date(System.currentTimeMillis())) // 발행 시간
-                .expiration(new Date(System.currentTimeMillis() + expiredMs)) // 만료 시간
-                .signWith(secretKey) // 암호화
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expiredMs))
+                .signWith(secretKey)
                 .compact();
+    }
+    public String getCategory(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category", String.class);
     }
 }

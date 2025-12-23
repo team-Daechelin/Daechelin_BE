@@ -1,12 +1,15 @@
 package daedeok.daechelin.global.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import daedeok.daechelin.domain.token.entity.RefreshToken;
+import daedeok.daechelin.domain.token.repository.RefreshTokenRepository;
 import daedeok.daechelin.global.request.LoginRequest; // 작성하신 LoginRequest DTO 사용
 import daedeok.daechelin.global.security.config.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,6 +26,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     // /login 요청이 오면 실행되는 메소드 (
     @Override
@@ -50,7 +54,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
 
-        // 인증된 유저 정보 가져오기
         String username = authentication.getName();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -58,11 +61,25 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        // 토큰 생성 (유효시간: 예시로 10시간)
-        String token = jwtUtil.createJwt(username, role, 60*60*10*1000L);
+        // 1. 토큰 생성
+        // Access Token: 10분
+        String access = jwtUtil.createJwt("access", username, role, 600000L);
+        // Refresh Token: 24시간
+        String refresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
 
-        // 헤더에 담아서 응답 (Bearer 방식)
-        response.addHeader("Authorization", "Bearer " + token);
+        // 2. Redis에 Refresh Token 저장
+        addRefreshToken(username, refresh, 86400000L);
+
+        // 3. 응답 설정
+        response.setHeader("access", access); // Access Token은 헤더에
+        response.setHeader("refresh", refresh); // 편의상 헤더에 같이 보냄 (쿠키로 해도 됨)
+        response.setStatus(HttpStatus.OK.value());
+    }
+
+    private void addRefreshToken(String username, String refresh, Long expiredMs) {
+        // Redis에 저장 (key: refreshToken, value: username)
+        RefreshToken refreshToken = new RefreshToken(refresh, username);
+        refreshTokenRepository.save(refreshToken);
     }
 
     // 3. 인증 실패 시 실행

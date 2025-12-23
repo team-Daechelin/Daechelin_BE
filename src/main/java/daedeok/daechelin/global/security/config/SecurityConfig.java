@@ -1,6 +1,7 @@
 package daedeok.daechelin.global.security.config;
 
 import daedeok.daechelin.global.jwt.LoginFilter;
+import daedeok.daechelin.domain.token.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor; // Lombok 사용
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,13 +51,15 @@ public class SecurityConfig {
 
         // 경로별 인가 작업
         http.authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/login", "/", "/join").permitAll()
+                .requestMatchers("/login", "/", "/join", "/reissue").permitAll() // /reissue 추가
                 .requestMatchers("/admin").hasRole("ADMIN")
                 .anyRequest().authenticated());
 
+        // JWTFilter는 Access Token 검증만 하므로 그대로 두거나, category 확인 로직 추가 가능
         http.addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
 
-        http.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
+        // (수정) LoginFilter에 refreshTokenRepository도 같이 넘겨줌
+        http.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshTokenRepository), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
